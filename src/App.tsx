@@ -1,4 +1,5 @@
 import './index.css';
+import { useMemo } from "@lynx-js/react";
 
 export function App() {
   return (
