@@ -3,6 +3,7 @@
 - ## Links
   - [useRef and useMemo examples](https://dev.to/bhavzlearn/demystifying-useref-and-usememo-in-react-4jcl)
   - [useRef, useMemo, useCallback](https://dev.to/michael_osas/understanding-react-hooks-how-to-use-useref-usememo-and-usecallback-for-more-efficient-code-3ceh)
+  - [Escape Hatches react doc](https://react.dev/learn/referencing-values-with-refs)
 
 - ## Update state (re-render)
 
@@ -92,6 +93,18 @@
 
   - Está salvando o counter para exibir na UI quantas vezes foi clicado, mas também está salvando localmente o prevValue. Pode ser útil para fazer alguma lógica envolvendo o valor anterior ou precise desse valor para outra coisa
 
+- ### Use case with useEffect
+
+  ```js
+  const renderCount = useRef(0)
+  useEffect (() => {
+  setRenderCount (prevRenderCount => prevRenderCount + 1)
+  })
+  ```
+
+  - Preciso atualizar essa variável a cada `re-render`, mas ela não pode atualizar o estado da **UI** se não o `useEffect` vai ser chamado novamente ficando em um loop. Então preciso persistir um estado sem que este atualize a **UI** -> `useRef()`
+  - OBS: esse `useEffect` vai ser chamado toda vez que a **tela atualizar**
+
 - ## useMemo()
 
   ``` js
@@ -142,4 +155,48 @@
       console.log('Theme changed') // will print only if the value of themeStyles is updated
     },
     [themeStyles])
+    ```
+
+  - ## useCallback
+  
+  ```js
+  export default function ProductPage({ productId, referrer, theme }) {
+    const handleSubmit = useCallback((orderDetails) => {
+      post('/product/' + productId + '/buy', {
+        referrer,
+        orderDetails,
+      });
+    }, [productId, referrer]);
+  ```
+
+  - É basicamente o `useMemo`, mas ele faz um cache da função em si e não do retorno dela como no useMemo (que executa a função) o `useCallback` não executa a função
+
+  - Toda vez que o componente é `re-renderizado` o **React** recria todas as funções do componente, no caso ele recriaria o `handleSubmit` se não usasse o `useCallback`. o `useCallback` é usado para que o **React** *não recrie aquela função em um novo re-render se suas dependencies não mudarem*, ele vai retornar a própria `fn` em **cache** (memoizada). Assim ao passar essa função para um child por exemplo, não vai precisar passar uma nova função para o child assim impedindo do child causar algum side effect baseado na criação dessa `função/prop`
+
+  - ### Example 1
+
+    - O useCallback vai memoizar (armazenar) essa função abaixo inteira e não só seu resultado:
+
+    ```jsx
+      const getItems = useCallback((inc, dec) => {
+        const doubled = number * 2
+        const half = number / 2
+        return [number, doubled, half, number + inc, number - dec]
+        ｝，［number］
+
+      return (
+        ...
+        <List getItems={getItems}>
+      )
+
+      ///
+
+      export default function List({ getItems }) {
+        const [items, setItems] = useState([])
+        useEffect (() => {
+          setItems (getItems (2, 1))
+          console. log( 'Updating Items')
+        }, [getItems])
+        return items.map (item => ‹div key={item}>{item}</div›)
+      ｝
     ```
