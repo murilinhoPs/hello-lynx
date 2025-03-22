@@ -1,6 +1,7 @@
 # React
 
 - ## Links
+
   - [useRef and useMemo examples](https://dev.to/bhavzlearn/demystifying-useref-and-usememo-in-react-4jcl)
   - [useRef, useMemo, useCallback](https://dev.to/michael_osas/understanding-react-hooks-how-to-use-useref-usememo-and-usecallback-for-more-efficient-code-3ceh)
   - [Escape Hatches react doc](https://react.dev/learn/referencing-values-with-refs)
@@ -21,6 +22,44 @@
     ```
 
     Ao comparar esses dois objetos, por mais que eles tenham oo mesmo valor, o JS entende que eles são diferentes pq sua `Ref` é diferente um do outro.
+
+- ## useEffect()
+
+    ```js
+    useEffect(() => {
+      console.info("Print onComponentDidChangeDependencies"); // is triggered whenerver the component is re-rendred, or when ANY dependencies changed
+    });
+    ```
+
+    ```js
+    useEffect(() => {
+      console.info("Print onComponentMount"); // on initState, when component is rendered first time
+    }, []);
+    ```
+
+    ```jsx
+    const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+    useEffect(() => {
+      const connection = createConnection(serverUrl, roomId);
+      connection.connect();
+      console.log('Connected onComponentChangeDependencies') // when change serverUrl or roomId
+    }, [serverUrl, roomId]);
+  ```
+  
+  ```jsx
+    const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+    useEffect(() => {
+      const connection = createConnection(serverUrl, roomId);
+      connection.connect();
+      // this return is executed when the component is closed (umnount or dispose)
+      return () => {
+        console.log('Disconnect onComponentUnmount')
+        connection.disconnect();
+      }
+    }, [serverUrl, roomId]);
+  ```
 
 - ## useRef()
 
